@@ -1,12 +1,4 @@
-let player1Pokemon = null;
-let player2Pokemon = null;
-let player1Inventory = [];
-let player2Inventory = [];
-let player1Victories = 0;
-let player2Victories = 0;
-let currentTurn = null;
-
-// Datos locales de Pokémon como fallback
+// Declaraciones de variables y datos al inicio
 const pokemonData = {
     1: {
         id: 1,
@@ -18,7 +10,7 @@ const pokemonData = {
         defense: 49,
         speed: 45,
         types: "grass, poison",
-        abilities: getAbilitiesByType(["grass", "poison"])
+        abilities: [] // Se llenará después
     },
     5: {
         id: 5,
@@ -30,7 +22,7 @@ const pokemonData = {
         defense: 58,
         speed: 65,
         types: "fire",
-        abilities: getAbilitiesByType(["fire"])
+        abilities: [] // Se llenará después
     },
     25: {
         id: 25,
@@ -42,7 +34,7 @@ const pokemonData = {
         defense: 40,
         speed: 90,
         types: "electric",
-        abilities: getAbilitiesByType(["electric"])
+        abilities: [] // Se llenará después
     }
 };
 
@@ -102,6 +94,15 @@ const typeAbilities = {
     ]
 };
 
+let player1Pokemon = null;
+let player2Pokemon = null;
+let player1Inventory = [];
+let player2Inventory = [];
+let player1Victories = 0;
+let player2Victories = 0;
+let currentTurn = null;
+
+// Funciones
 function getAbilitiesByType(types) {
     const abilities = new Set();
     types.forEach(type => {
@@ -113,6 +114,11 @@ function getAbilitiesByType(types) {
     });
     return Array.from(abilities).map(JSON.parse);
 }
+
+// Inicializar las habilidades de pokemonData después de declarar typeAbilities
+Object.values(pokemonData).forEach(pokemon => {
+    pokemon.abilities = getAbilitiesByType(pokemon.types.split(', '));
+});
 
 async function fetchPokemonData(pokemonId) {
     try {
@@ -195,6 +201,7 @@ async function searchPokemon() {
     attackElement.textContent = `Ataque: ${pokemon.attack}`;
 }
 
+// Resto de las funciones (selectPokemonForPlayer, renderInventory, etc.) permanecen iguales
 function selectPokemonForPlayer(player) {
     const pokemonInput = document.getElementById('pokemonIdInput').value;
     if (!pokemonInput) {
