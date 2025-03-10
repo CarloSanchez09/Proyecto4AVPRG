@@ -98,22 +98,38 @@ async function fetchPokemonData(pokemonId) {
     }
 }
 
-async function searchPokemon() {
-    console.log('searchPokemon ejecutado');
-    const pokemonInput = document.getElementById('pokemonIdInput').value;
-    if (!pokemonInput) {
-        alert('Por favor, ingresa un ID de Pokémon.');
-        return;
+async function fetchPokemonData(pokemonId) {
+    try {
+        console.log(`Intentando buscar Pokémon con ID: ${pokemonId}`);
+        const id = parseInt(pokemonId);
+        if (isNaN(id) || id < 1 || id > 1010) {
+            throw new Error('ID inválido. Usa un número entre 1 y 1010.');
+        }
+        console.log('Haciendo solicitud a la API...');
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`); // Sin proxy
+        console.log(`Respuesta de la API: ${response.status}`);
+        if (!response.ok) throw new Error(`Código de estado: ${response.status} - Pokémon no encontrado`);
+        const data = await response.json();
+        const types = data.types.map(type => type.type.name);
+        
+        return {
+            id: data.id,
+            name: data.name,
+            image: data.sprites.front_default || 'placeholder.png',
+            hp: data.stats.find(stat => stat.stat.name === 'hp').base_stat,
+            maxHp: data.stats.find(stat => stat.stat.name === 'hp').base_stat,
+            attack: data.stats.find(stat => stat.stat.name === 'attack').base_stat,
+            defense: data.stats.find(stat => stat.stat.name === 'defense').base_stat,
+            speed: data.stats.find(stat => stat.stat.name === 'speed').base_stat,
+            types: types.join(', '),
+            abilities: getAbilitiesByType(types),
+            status: null
+        };
+    } catch (error) {
+        console.error("Error en fetchPokemonData:", error);
+        alert(`Error al buscar Pokémon: Código de estado: ${error.message.includes('status') ? error.message.split(' - ')[0].split(': ')[1] : error.message}. Intenta con un ID válido (ej. 25).`);
+        return null;
     }
-
-    const pokemon = await fetchPokemonData(pokemonInput);
-    if (!pokemon) return;
-
-    document.getElementById('pokemon-image').src = pokemon.image;
-    document.getElementById('pokemon-name').textContent = pokemon.name;
-    document.getElementById('pokemon-types').textContent = `Tipo: ${pokemon.types}`;
-    document.getElementById('pokemon-hp').textContent = `HP: ${pokemon.hp}`;
-    document.getElementById('pokemon-attack').textContent = `Ataque: ${pokemon.attack}`;
 }
 
 function selectPokemonForPlayer(player) {
